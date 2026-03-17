@@ -19,7 +19,7 @@ You can convince yourself that the optimizer behaves the same way given a restri
 
 ```
 pip install ranger21
-python optimizer_test.py
+python rangerliter_test.py
 ```
 
 Usage:
@@ -42,3 +42,14 @@ optimizer = RangerLite(
     use_legacy_scoping_bug=False
 )
 ```
+
+### Ranger21Fix
+
+You can also init the submodule and run
+
+```
+pip install ranger21
+python ranger21fix_test.py
+```
+
+to convince yourself that Ranger21Fix contains a fix for the ranger21 leaked variable bug.

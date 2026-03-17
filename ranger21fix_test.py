@@ -24,8 +24,8 @@ class ToyModel(nn.Module):
         x = self.fc2(x)
         return x
 
-def verify_optimizers_match(seed, use_weight_decay=True):
-    print(f"START verify_optimizers_match {seed=} {use_weight_decay=}")
+def verify_optimizers_match(seed, use_madgrad=True):
+    print(f"START verify_optimizers_match {seed=} {use_madgrad=}")
     torch.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
@@ -37,10 +37,10 @@ def verify_optimizers_match(seed, use_weight_decay=True):
     # Create explicit parameter groups
     def get_param_groups(model):
         return [
-            {"params": model.conv1.parameters(), "lr": 1.5, "weight_decay": 1e-4 if use_weight_decay else 0.0},
-            {"params": model.bn1.parameters(), "lr": 1.0, "weight_decay": 0.0 if use_weight_decay else 0.0},
-            {"params": model.fc1.parameters(), "lr": 0.5, "weight_decay": 1e-5 if use_weight_decay else 0.0},
-            {"params": model.fc2.parameters(), "lr": 1.0, "weight_decay": 1e-2 if use_weight_decay else 0.0},
+            {"params": model.conv1.parameters(), "lr": 1.5, "weight_decay": 1e-4},
+            {"params": model.bn1.parameters(), "lr": 1.0, "weight_decay": 0.0},
+            {"params": model.fc1.parameters(), "lr": 0.5, "weight_decay": 1e-5},
+            {"params": model.fc2.parameters(), "lr": 1.0, "weight_decay": 1e-2},
         ]
 
     # Initialize OLD Optimizer
@@ -52,6 +52,7 @@ def verify_optimizers_match(seed, use_weight_decay=True):
         num_batches_per_epoch=4,
         num_epochs=8,
         num_warmup_iterations=2,
+        use_madgrad=use_madgrad,
     )
 
     opt_new_0 = Ranger21Fix(
@@ -61,6 +62,7 @@ def verify_optimizers_match(seed, use_weight_decay=True):
         num_batches_per_epoch=4,
         num_epochs=8,
         num_warmup_iterations=2,
+        use_madgrad=use_madgrad,
         use_legacy_scoping_bug=True,
     )
     opt_new_1 = Ranger21Fix(
@@ -70,6 +72,7 @@ def verify_optimizers_match(seed, use_weight_decay=True):
         num_batches_per_epoch=4,
         num_epochs=8,
         num_warmup_iterations=2,
+        use_madgrad=use_madgrad,
         use_legacy_scoping_bug=False,
     )
 

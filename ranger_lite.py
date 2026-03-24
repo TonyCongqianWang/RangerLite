@@ -49,11 +49,12 @@ class RangerLite(torch.optim.Optimizer):
 
     def unit_norm(self, x):
         """
-        Normalizes parameters such that each 'unit' (row/filter) has a unit norm.
-        Works for:
-        - Linear: (out, in) -> Norm per neuron
-        - Conv2d: (out, in, h, w) -> Norm per filter
-        - Embedding: (vocab, dim) -> Norm per vector
+        Calculates the L2 norm of each sub-unit (row/filter) in a parameter tensor.
+        Returns a tensor of norms with the same number of dimensions as x (via keepdim).
+        Examples:
+            - Linear: (out, in) -> Norm per neuron
+            - Conv2d: (out, in, h, w) -> Norm per filter
+            - Embedding: (vocab, dim) -> Norm per vector
         """
         xlen = x.ndim
 

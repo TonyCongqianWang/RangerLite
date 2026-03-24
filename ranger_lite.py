@@ -69,8 +69,16 @@ class RangerLite(torch.optim.Optimizer):
             with torch.enable_grad():
                 loss = closure()
 
+        first_param = next(
+            (p for group in self.param_groups for p in group['params'] if p.grad is not None),
+            None,
+        )
+
+        if first_param is None:
+            return loss # No grads to process
+
+        variance_ma_sum = torch.zeros(1, device=first_param.device)
         param_size = 0
-        variance_ma_sum = torch.zeros(1)
         leaked_p = None
 
         # Phase 1: Accumulate variance_ma_sum for stable weight decay
@@ -80,7 +88,6 @@ class RangerLite(torch.optim.Optimizer):
                     continue
 
                 leaked_p = p
-
                 param_size += p.numel()
                 grad = p.grad
 
@@ -227,7 +234,8 @@ class RangerLite(torch.optim.Optimizer):
 
     def swap_for_inference(self):
         """Safely loads slow weights for eval/saving. Idempotent."""
-        if not self.lookahead_active: return
+        if not self.lookahead_active:
+            return
         for group in self.param_groups:
             for p in group["params"]:
                 state = self.state[p]
@@ -239,7 +247,8 @@ class RangerLite(torch.optim.Optimizer):
 
     def restore_for_training(self):
         """Restores fast weights for training. Idempotent."""
-        if not self.lookahead_active: return
+        if not self.lookahead_active:
+            return
         for group in self.param_groups:
             for p in group["params"]:
                 state = self.state[p]
